@@ -1,6 +1,6 @@
 Sudoku4 adalah aplikasi berbasis website yang membawa permainan sudoku ke ranah pertandingan antar pemain. Pemain yang berjumlah maksimal 4 bisa bertanding menguji logika mereka untuk menyelesaikan puzzle Sudoku secepat mungkin.
 
-Sudoku4 akan dikembangkan dengan menerapkan metode RAD. Tim pengembang:
+Sudoku4 akan dikembangkan dengan menerapkan metode RAD/Scrum. Tim pengembang:
 - Chairul 'Azmi Zuhdi Pramono:
 - Ara Rosalia Safitri:
 - Fahalliza Nastitie Dewi:
