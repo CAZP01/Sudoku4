@@ -4,7 +4,7 @@ Sudoku4 akan dikembangkan dengan menerapkan metode RAD. Tim pengembang:
 - Chairul 'Azmi Zuhdi Pramono: Developer
 - Ara Rosalia Safitri: UI Design
 - Fahalliza Nastitie Dewi: Tester
-- Aimar Susanto: 
+- Aimar Susanto: Project owner
 
 FITUR:
 - Deathmatch PVP: Pemain akan bertanding menyelesaikan puzzle sudoku secepat mungkin dengan batas waktu yang ditentukan. Pemain yang menyelesaikan semua puzzle atau puzzle terbanyak adalah pemenang.
