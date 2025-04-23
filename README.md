@@ -11,3 +11,5 @@ FITUR:
 - Tombol yang resonance dengan keyboard.
 - Leaderboard: Menampilkan peringkat pemain berdasarkan jumlah puzzle yang telah diselesaikan.
 - Room Matchmaking: Ruang tunggu pemain sebelum permainan dimulai. Permainan akan dimulai ketika jumlah pemain = 4 atau dapat dimulai langsung oleh host tanpa menunggu 4 pemain.
+
+Figma:
