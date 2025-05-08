@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>REGISTER SUDOKU4</title>
+</head>
+<body>
+  <h2>WELCOME TO SUDOKU</h2>
+  <h2>Let's create your account</h2>
+  <div id="authSection">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Password" required><br>
+    <button onclick="register()">Daftar</button>
+  </div>
+
+  <div id="userSection" style="display:none;">
+    <p>Selamat datang, <span id="userEmail"></span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div id="status"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAiVOX_F9rf0BmnNgqZM96hrBcocQ2dhRE",
+      authDomain: "sudoku4-b6fe4.firebaseapp.com",
+      projectId: "sudoku4-b6fe4",
+      storageBucket: "sudoku4-b6fe4.firebasestorage.app",
+      messagingSenderId: "611453959407",
+      appId: "1:611453959407:web:bfd851d26ac4b8a6ebef1a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.register = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          document.getElementById("status").innerText = "Akun berhasil dibuat! Silakan login.";
+        })
+        .catch((error) => {
+          document.getElementById("status").innerText = `Gagal daftar: ${error.message}`;
+        });
+    };
+
+    window.logout = () => {
+      signOut(auth).then(() => {
+        document.getElementById("status").innerText = "Berhasil logout.";
+      });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("authSection").style.display = "none";
+        document.getElementById("userSection").style.display = "block";
+        document.getElementById("userEmail").innerText = user.email;
+      } else {
+        document.getElementById("authSection").style.display = "block";
+        document.getElementById("userSection").style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
