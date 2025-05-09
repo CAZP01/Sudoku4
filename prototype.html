@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-right: 20px;
+            display: inline-block;
+        }
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid black;
+            font-size: 20px;
+            position: relative;
+        }
+        input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 20px;
+            border: none;
+            outline: none;
+        }
+        .incorrect {
+            background-color: #ffcccc;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+        }
+        .info {
+            margin-bottom: 10px;
+        }
+        .num-pad {
+            display: flex;
+            flex-wrap: wrap;
+            width: 150px;
+            margin-top: 10px;
+        }
+        .num-pad button {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            margin: 2px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .num-pad button.active {
+            transform: scale(0.9);
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Game</h1>
+    <div class="info">
+        <p>Time: <span id="timer">0</span> seconds</p>
+        <p>Lives: <span id="lives">3</span></p>
+    </div>
+    <div class="container">
+        <table id="sudokuBoard"></table>
+        <table id="solutionBoard"></table>
+    </div>
+    <div class="num-pad" id="numPad"></div>
+    <script>
+        let time = 0;
+        let lives = 3;
+        let selectedInput = null;
+        let timerInterval = setInterval(() => {
+            document.getElementById("timer").textContent = ++time;
+        }, 1000);
+
+        function createNumPad() {
+            let numPad = document.getElementById("numPad");
+            for (let i = 1; i <= 9; i++) {
+                let button = document.createElement("button");
+                button.textContent = i;
+                button.id = `num-${i}`;
+                button.onclick = () => {
+                    if (selectedInput) {
+                        selectedInput.value = i;
+                        checkInput({ target: selectedInput });
+                    }
+                };
+                numPad.appendChild(button);
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (selectedInput && event.key >= 1 && event.key <= 9) {
+                selectedInput.value = event.key;
+                checkInput({ target: selectedInput });
+                let button = document.getElementById(`num-${event.key}`);
+                if (button) {
+                    button.classList.add("active");
+                    setTimeout(() => button.classList.remove("active"), 100);
+                }
+            }
+        });
+
+        function generateSudoku() {
+            let board = Array.from({ length: 9 }, () => Array(9).fill(0));
+            for (let i = 0; i < 9; i++) {
+                let rowNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+                board[i] = rowNumbers;
+            }
+            return board;
+        }
+
+        function removeNumbers(board, difficulty = 40) {
+            let puzzle = board.map(row => [...row]);
+            let count = difficulty;
+            while (count > 0) {
+                let row = Math.floor(Math.random() * 9);
+                let col = Math.floor(Math.random() * 9);
+                if (puzzle[row][col] !== 0) {
+                    puzzle[row][col] = 0;
+                    count--;
+                }
+            }
+            return puzzle;
+        }
+
+        function displaySudoku(board, elementId, isSolution = false) {
+            let table = document.getElementById(elementId);
+            table.innerHTML = "";
+            for (let i = 0; i < 9; i++) {
+                let row = document.createElement("tr");
+                for (let j = 0; j < 9; j++) {
+                    let cell = document.createElement("td");
+                    if (isSolution || board[i][j] !== 0) {
+                        cell.textContent = board[i][j];
+                    } else {
+                        let input = document.createElement("input");
+                        input.type = "text";
+                        input.maxLength = 1;
+                        input.dataset.row = i;
+                        input.dataset.col = j;
+                        input.addEventListener("input", checkInput);
+                        input.addEventListener("focus", () => selectedInput = input);
+                        cell.appendChild(input);
+                    }
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+        }
+
+        function checkInput(event) {
+            let input = event.target;
+            let row = input.dataset.row;
+            let col = input.dataset.col;
+            let value = parseInt(input.value);
+            if (value !== solution[row][col]) {
+                input.classList.add("incorrect");
+                if (lives > 0) {
+                    lives--;
+                    document.getElementById("lives").textContent = lives;
+                }
+                if (lives === 0) {
+                    alert("Game Over!");
+                    clearInterval(timerInterval);
+                }
+            } else {
+                input.classList.remove("incorrect");
+            }
+        }
+
+        let solution = generateSudoku();
+        let puzzle = removeNumbers(solution);
+        displaySudoku(puzzle, "sudokuBoard");
+        displaySudoku(solution, "solutionBoard", true);
+        createNumPad();
+    </script>
+</body>
+</html>
