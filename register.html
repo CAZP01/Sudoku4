@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>REGISTER SUDOKU4</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h2>WELCOME TO SUDOKU</h2>
@@ -10,10 +16,11 @@
   <div id="authSection">
     <input type="email" id="email" placeholder="Email" required><br>
     <input type="password" id="password" placeholder="Password" required><br>
+    <input type="password" id="passwordtry" placeholder="Konfirmasi Password" required><br>
     <button onclick="register()">Daftar</button>
   </div>
 
-  <div id="userSection" style="display:none;">
+  <div id="userSection" class="hidden">
     <p>Selamat datang, <span id="userEmail"></span></p>
     <button onclick="logout()">Logout</button>
   </div>
@@ -40,14 +47,20 @@
     window.register = () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
+      const passwordtry = document.getElementById("passwordtry").value;
 
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById("status").innerText = "Akun berhasil dibuat! Silakan login.";
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = `Gagal daftar: ${error.message}`;
-        });
+      if (password === passwordtry) {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(() => {
+              document.getElementById("status").innerText = "Akun berhasil dibuat! Silakan login.";
+            })
+            .catch((error) => {
+              document.getElementById("status").innerText = `Gagal daftar: ${error.message}`;
+            });
+      } else {
+        document.getElementById("status").innerText = "Password tidak sesuai.";
+        window.register();
+      }
     };
 
     window.logout = () => {
@@ -58,12 +71,12 @@
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        document.getElementById("authSection").style.display = "none";
-        document.getElementById("userSection").style.display = "block";
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("userSection").classList.remove("hidden");
         document.getElementById("userEmail").innerText = user.email;
       } else {
-        document.getElementById("authSection").style.display = "block";
-        document.getElementById("userSection").style.display = "none";
+        document.getElementById("authSection").classList.remove("hidden");
+        document.getElementById("userSection").classList.add("hidden");
       }
     });
   </script>
