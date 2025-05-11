@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .hidden {
+      display: none;
+    }
+    button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <a href="lobby.html">
+      <button>Play</button>
+    </a>
+    <button onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+
+  <h2>Data User</h2>
+  <div id="UserPlace">
+    <p><span id="displayUsername">...</span></p>
+    <button onclick="toggleUserEdit()">
+      <i class="fas fa-edit"></i>
+    </button>
+  </div>
+
+  <div id="UserEdit" class="hidden">
+    <input type="text" id="username" placeholder="Masukkan username baru">
+    <button id="change">
+      <i class="fas fa-check"></i>
+    </button>
+  </div>
+
+  <h2>Leaderboard</h2>
+  <ol id="leaderboard"></ol>
+
+  <div id="status"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAiVOX_F9rf0BmnNgqZM96hrBcocQ2dhRE",
+      authDomain: "sudoku4-b6fe4.firebaseapp.com",
+      databaseURL: "https://sudoku4-b6fe4-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sudoku4-b6fe4",
+      storageBucket: "sudoku4-b6fe4.appspot.com",
+      messagingSenderId: "611453959407",
+      appId: "1:611453959407:web:bfd851d26ac4b8a6ebef1a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const dbRef = ref(db);
+
+    let currentUID = null;
+
+    window.toggleUserEdit = function () {
+      document.getElementById("UserPlace").classList.toggle("hidden");
+      document.getElementById("UserEdit").classList.toggle("hidden");
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const email = user.email;
+          const uid = user.uid;
+          currentUID = uid;
+
+          const userRef = ref(db, 'users/' + uid);
+
+          get(userRef).then((snapshot) => {
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              document.getElementById("displayUsername").innerText = data.username || "Blanc";
+              document.getElementById("username").value = data.username || "";
+            } else {
+              window.location.href = "login.html";
+            }
+          });
+
+          document.getElementById("change").addEventListener("click", () => {
+            const newUsername = document.getElementById("username").value;
+            const updatedData = {
+              email: email,
+              username: newUsername,
+              score: 0
+            };
+
+            set(userRef, updatedData).then(() => {
+              alert("Username diperbarui!");
+              document.getElementById("displayUsername").innerText = newUsername;
+              toggleUserEdit();
+            });
+          });
+        } else {
+          document.getElementById("status").innerText = "User belum login.";
+        }
+      });
+
+      get(child(dbRef, 'users')).then((snapshot) => {
+        if (snapshot.exists()) {
+          const users = snapshot.val();
+          const leaderboardArray = [];
+
+          for (const uid in users) {
+            const user = users[uid];
+            leaderboardArray.push({
+              username: user.username || "NoName",
+              score: user.score || 0
+            });
+          }
+
+          leaderboardArray.sort((a, b) => b.score - a.score);
+
+          const leaderboardList = document.getElementById("leaderboard");
+          leaderboardList.innerHTML = "";
+
+          leaderboardArray.forEach((user) => {
+            const li = document.createElement("li");
+            li.textContent = `${user.username} - ${user.score}`;
+            leaderboardList.appendChild(li);
+          });
+        }
+      });
+    });
+
+    window.logout = () => {
+        signOut(auth).then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            console.error("Logout gagal:", error);
+        });
+    };
+  </script>
+</body>
+</html>
