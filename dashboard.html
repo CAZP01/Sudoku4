@@ -14,6 +14,9 @@
   </style>
 </head>
 <body>
+  <img src="logo.png"/>
+  <h1>SUDOKU</h1>
+  <h2>Deathmatch</h2>
   <div>
     <a href="lobby.html">
       <button>Play</button>
@@ -23,7 +26,6 @@
     </button>
   </div>
 
-  <h2>Data User</h2>
   <div id="UserPlace">
     <p><span id="displayUsername">...</span></p>
     <button onclick="toggleUserEdit()">
@@ -32,13 +34,12 @@
   </div>
 
   <div id="UserEdit" class="hidden">
-    <input type="text" id="username" placeholder="Masukkan username baru">
+    <input type="text" id="username" placeholder="New Username">
     <button id="change">
       <i class="fas fa-check"></i>
     </button>
   </div>
 
-  <h2>Leaderboard</h2>
   <ol id="leaderboard"></ol>
 
   <div id="status"></div>
@@ -104,7 +105,7 @@
             });
           });
         } else {
-          document.getElementById("status").innerText = "User belum login.";
+          window.location.href = "login.html";
         }
       });
 
@@ -116,7 +117,7 @@
           for (const uid in users) {
             const user = users[uid];
             leaderboardArray.push({
-              username: user.username || "NoName",
+              username: user.username || "Blanc",
               score: user.score || 0
             });
           }
