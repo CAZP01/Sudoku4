@@ -5,26 +5,182 @@
   <title>User Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #AECBEB, #AECBEB);
+      color: #13293d;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 0 32px;
+      color: #13293d;
+      width: 100vw;
+    }
+
+    #logo {
+      display: flex;
+      align-items: center;
+    }
+
+    #logo h1 {
+      margin-left: 8px;
+      font-size: 20px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions h2 {
+      font-size: 14px;
+      margin-right: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 30px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .logout-btn {
+      background-color: #BEE9B8;
+      color: #13293d;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 30px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .about, .htp, .sdt {
+      padding: 24px 32px;
+    }
+
+    .about h2, .htp h2, .sdt h2 {
+      margin-bottom: 12px;
+    }
+
+    .htp ul, .sdt ul {
+      background-color: rgba(0, 119, 182, 0.2);
+      color: #13293d;
+      padding: 16px 16px 16px 32px;
+      border-radius: 12px;
+      list-style-type: disc;
+      margin-top: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .htp ul li, .sdt ul li {
+      margin-bottom: 8px;
+      padding-left: 10px;
+    }
+
     .hidden {
       display: none;
     }
-    button {
-      margin: 5px;
+
+    footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background-color: #13293d;
+      padding: 20px 32px;
+      color: #ffffff;
+      width: 100vw;
     }
+
+    #footer-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: flex-start;
+    }
+
+    .logo {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .logo h2 {
+      margin-top: 15px;
+      margin-left: 4px;
+      font-size: 20px;
+    }
+
+    #footer-logo p {
+      font-size: 14px;
+      margin-top: 2px;
+      margin-left: 18px;
+    }
+
+    .footer-developer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      font-size: 14px;
+      padding: 16px;
+      gap: 700px
+    }
+
+    .developer-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 200px;
+    }
+    .developer-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 200px;
+      flex-wrap: wrap;
+    }
+  
   </style>
 </head>
-<body>
-  <img src="logo.png"/>
-  <h1>SUDOKU</h1>
-  <h2>Deathmatch</h2>
-  <div>
-    <a href="lobby.html">
-      <button>Play</button>
-    </a>
-    <button onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i>
-    </button>
-  </div>
+<header>
+    <div id="logo">
+      <img src="logo.png" alt="Logo" style="width: 50px; height: 50px;">
+      <h1>Sudoku</h1>
+    </div>
+
+    <div class="header-actions">
+      <h2>Deathmatch</h2>
+      <a href="lobby.html">
+        <button>Play</button>
+      </a>
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </header>
 
   <div id="UserPlace">
     <p><span id="displayUsername">...</span></p>
@@ -38,6 +194,34 @@
     <button id="change">
       <i class="fas fa-check"></i>
     </button>
+  </div>
+
+  <ol id="leaderboard"></ol>
+  <div id="status"></div>
+
+  <div class="about">
+    <h2>About Sudoku</h2>
+    <p>The popular Japanese puzzle game Sudoku is based on the logical placement of numbers.
+      An online game of logic, Sudoku doesn`t require any calculation nor special math skills; all that is needed are brains and concentration.</p>
+  </div>
+
+  <div class="htp">
+    <h2>How to Play Sudoku</h2>
+    <p>The goal of Sudoku is to fill in a 9x9 grid with digits so that each column, row, and 3x3 section contain the numbers between 1 to 9. At the beginning of the game, the 9x9 grid will have some of the squares filled in. Your job is to use logic to fill in the missing digits and complete the grid. Don`t forget, a move is incorrect if:</p>
+    <ul>
+      <li>Any row contains more than one of the same number from 1 to 9</li>
+      <li>Any column contains more than one of the same number from 1 to 9</li>
+      <li>Any 3x3 section contains more than one of the same number from 1 to 9</li>
+    </ul>
+  </div>
+
+  <div class="sdt">
+    <h2>Sudoku Tips</h2>
+    <p>Sudoku is a fun puzzle game once you get the hang of it. At the same time, learning to play Sudoku can be a bit intimidating for beginners. So, if you are a complete beginner, here are a few Sudoku tips that you can use to improve your Sudoku skills.</p>
+    <ul>
+      <li>Tip 1: Look for rows, columns of 3x3 sections that contain 5 or more numbers. Work through the remaining empty cells, trying the numbers that have not been used. In many cases, you will find numbers that can only be placed in one position considering the other numbers that are already in its row, column, and 3x3 grid.</li>
+      <li>Tip 2: Break the grid up visually into 3 columns and 3 rows. Each large column will have 3, 3x3 grids and each row will have 3, 3x3 grids. Now, look for columns or grids that have 2 of the same number. Logically, there must be a 3rd copy of the same number in the only remaining 9-cell section. Look at each of the remaining 9 positions and see if you can find the location of the missing number.</li>
+    </ul>
   </div>
 
   <ol id="leaderboard"></ol>
