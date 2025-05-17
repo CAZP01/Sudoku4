@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Matchmaking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #player-list {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      max-width: 400px;
+    }
+    .player {
+      padding: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lobby Room</h1>
+  <div id="player-list">
+    <h2>Players in Room:</h2>
+    <ul id="players-ul"></ul>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, get, push, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAiVOX_F9rf0BmnNgqZM96hrBcocQ2dhRE",
+      authDomain: "sudoku4-b6fe4.firebaseapp.com",
+      databaseURL: "https://sudoku4-b6fe4-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sudoku4-b6fe4",
+      storageBucket: "sudoku4-b6fe4.appspot.com",
+      messagingSenderId: "611453959407",
+      appId: "1:611453959407:web:bfd851d26ac4b8a6ebef1a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentRoomId = "";
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+
+        // Cari room yang belum penuh
+        const lobbyRef = ref(db, 'lobby');
+        const snapshot = await get(lobbyRef);
+        let found = false;
+
+        if (snapshot.exists()) {
+          const lobbies = snapshot.val();
+
+          for (const [roomId, room] of Object.entries(lobbies)) {
+            if ((room.status === 'waiting' || !room.status) &&
+                Object.keys(room.players || {}).length < room.maxPlayers) {
+              currentRoomId = roomId;
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (!found) {
+          // Buat room baru
+          const newRoomRef = push(ref(db, 'lobby'));
+          currentRoomId = newRoomRef.key;
+          await set(newRoomRef, {
+            maxPlayers: 4,
+            status: 'waiting',
+            players: {}
+          });
+        }
+
+        await joinLobby(currentRoomId, uid);
+        listenLobbyStatus(currentRoomId);
+        listenPlayers(currentRoomId);
+      } else {
+        console.log("User belum login.");
+      }
+    });
+
+    async function joinLobby(roomId, uid) {
+      const userRef = ref(db, `users/${uid}`);
+      const userSnap = await get(userRef);
+
+      if (!userSnap.exists()) {
+        console.log("Data user tidak ditemukan di /users/");
+        return;
+      }
+
+      const username = userSnap.val().username;
+
+      const roomRef = ref(db, `lobby/${roomId}`);
+      const roomSnap = await get(roomRef);
+
+      if (roomSnap.exists()) {
+        const room = roomSnap.val();
+        const playerCount = Object.keys(room.players || {}).length;
+
+        if (playerCount < room.maxPlayers) {
+          const playerRef = ref(db, `lobby/${roomId}/players/${uid}`);
+          await set(playerRef, {
+            uid,
+            username
+          });
+
+          if (playerCount + 1 === room.maxPlayers) {
+            update(ref(db, `lobby/${roomId}`), {
+              status: 'full'
+            });
+          }
+        } else {
+          console.log("Room penuh.");
+        }
+      }
+    }
+
+    function listenLobbyStatus(roomId) {
+      const roomRef = ref(db, 'lobby/' + roomId);
+      onValue(roomRef, (snapshot) => {
+        const room = snapshot.val();
+        if (room && room.status === 'full') {
+          window.location.href = "deathmatch.html";
+        }
+      });
+    }
+
+    function listenPlayers(roomId) {
+      const playersRef = ref(db, `lobby/${roomId}/players`);
+      onValue(playersRef, (snapshot) => {
+        const list = document.getElementById("players-ul");
+        list.innerHTML = "";
+
+        if (snapshot.exists()) {
+          const players = snapshot.val();
+          Object.values(players).forEach(player => {
+            const li = document.createElement("li");
+            li.className = "player";
+            li.textContent = player.username;
+            list.appendChild(li);
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
