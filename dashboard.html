@@ -39,7 +39,7 @@
       padding: 0 32px;
       color: #13293d;
       width: 100vw;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* <- bayangan bawah */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     #logo {
@@ -189,7 +189,6 @@
       color: white;
     }
 
-    /* User Profile */
     .user-card {
       background: rgba(255, 255, 255, 0);
       border-radius: 20px;
@@ -240,7 +239,6 @@
       font-size: 20px;
     }
 
-    /* Leaderboard Container */
     #leaderboardContainer {
       width: 50%;
     }
@@ -248,7 +246,7 @@
     .top-3 {
       display: flex;
       justify-content: center;
-      align-items: flex-end; /* biar tingginya keliatan beda */
+      align-items: flex-end;
       gap: -20px;
       margin-bottom: 24px;
     }
@@ -397,7 +395,7 @@
   <section class="user-card">
     <img class="user-avatar" alt="User Avatar"/>
     <div class="user-info">
-      <!-- Tampilan Username -->
+
       <div id="UserPlace">
         <h3 id="displayUsername"></h3>
         <button onclick="toggleUserEdit()">
@@ -405,7 +403,6 @@
         </button>
       </div>
 
-      <!-- Form Edit Username -->
       <div id="UserEdit" class="hidden">
         <input type="text" id="username" placeholder="New Username" />
         <button id="change">
@@ -471,7 +468,7 @@
         <p>Fahalliza Nastitie Dewi</p>
         <p>23106050030@student.uin-suka.ac.id</p>
         <p> </p>
-        <p>lorem ipsum</p>
+        <p>Aimar Susanto</p>
         <p>12345@example.com</p>
       </div>
     </div>
@@ -589,11 +586,9 @@
               const leaderboardList = document.getElementById("leaderboard");
               leaderboardList.innerHTML = "";
 
-              // Ambil hanya peringkat 4–8
-              const middleRanks = rest.slice(0, 5); // index 0 = rank 4
+              const middleRanks = rest.slice(0, 5);
               let currentUserRendered = false;
 
-              // Render peringkat 4–8
               middleRanks.forEach((user, index) => {
                 const li = document.createElement("li");
                 const isCurrentUser = user.uid === currentUID;
