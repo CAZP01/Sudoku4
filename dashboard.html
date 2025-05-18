@@ -176,7 +176,7 @@
 
     .dashboard {
       display: flex;
-      gap: 40px;
+      gap: 25px;
       padding: 68px;
       justify-content: center;
       flex-wrap: wrap;
@@ -351,13 +351,22 @@
     #leaderboard li span.rank,
     #leaderboard li span.uname {
       text-align: right;
-      margin-right: 40px;
-      flex-shrink: 0; /* sesuaikan sesuai kebutuhan */
+      margin-right: 18px;
+      flex-shrink: 0;
     }
 
     #leaderboard li span.scores {
       margin-left: auto;
       text-align: left;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 18px;
+      vertical-align: middle;
     }
 
     .leaderboard-list li.you {
@@ -386,11 +395,11 @@
 
 <main class="dashboard">
   <section class="user-card">
-    <img src="minji.jpg" class="user-avatar" />
+    <img class="user-avatar" alt="User Avatar"/>
     <div class="user-info">
       <!-- Tampilan Username -->
       <div id="UserPlace">
-        <h3 id="displayUsername">John Doe</h3>
+        <h3 id="displayUsername"></h3>
         <button onclick="toggleUserEdit()">
           <i class="fas fa-edit"></i> Edit
         </button>
@@ -503,6 +512,10 @@
           const email = user.email;
           const uid = user.uid;
           currentUID = uid;
+          const avatarImg = document.querySelector(".user-avatar");
+          if (avatarImg) {
+            avatarImg.src = `https://i.pravatar.cc/80?u=${uid}`;
+          }
 
           const userRef = ref(db, 'users/' + uid);
 
@@ -563,9 +576,10 @@
               [1, 0, 2].forEach((index, pos) => {
                 const user = top3[index];
                 const div = document.createElement("div");
+                const avatarUrl = `https://i.pravatar.cc/80?u=${user.uid}`;
                 div.className = `top-card ${positions[pos]}`;
                 div.innerHTML = `
-                  <img src="hanni.jpg" alt="avatar"/>
+                  <img src="${avatarUrl}" alt="Avatar"/>
                   <div class="username">${user.username}</div>
                   <div class="score">${user.score}</div>
                 `;
@@ -575,24 +589,54 @@
               const leaderboardList = document.getElementById("leaderboard");
               leaderboardList.innerHTML = "";
 
-              rest.forEach((user, index) => {
+              // Ambil hanya peringkat 4–8
+              const middleRanks = rest.slice(0, 5); // index 0 = rank 4
+              let currentUserRendered = false;
+
+              // Render peringkat 4–8
+              middleRanks.forEach((user, index) => {
                 const li = document.createElement("li");
                 const isCurrentUser = user.uid === currentUID;
+                const avatarUrl = `https://i.pravatar.cc/80?u=${user.uid}`;
                 li.className = isCurrentUser ? "you" : "";
                 li.innerHTML = `
                   <span class="rank">${index + 4}</span>
+                  <img src="${avatarUrl}" alt="Avatar" class="avatar"/>
                   <span class="uname">${user.username}</span>
                   <span class="scores">${user.score}</span>
                 `;
                 leaderboardList.appendChild(li);
+
+                if (isCurrentUser) {
+                  currentUserRendered = true;
+                }
               });
+
+              // Cek apakah user ada di top3
+              const inTop3 = top3.some(user => user.uid === currentUID);
+
+              if (!inTop3 && !currentUserRendered) {
+                const allUsers = [...top3, ...rest];
+                const currentUserIndex = allUsers.findIndex(user => user.uid === currentUID);
+
+                if (currentUserIndex !== -1) {
+                  const currentUser = allUsers[currentUserIndex];
+                  const avatarUrl = `https://i.pravatar.cc/80?u=${currentUser.uid}`;
+                  const li = document.createElement("li");
+                  li.className = "you";
+                  li.innerHTML = `
+                    <span class="rank">${currentUserIndex + 1}</span>
+                    <img src="${avatarUrl}" alt="Avatar" class="avatar"/>
+                    <span class="uname">${currentUser.username}</span>
+                    <span class="scores">${currentUser.score}</span>
+                  `;
+                  leaderboardList.appendChild(li);
+                }
+              }
             }
           });
-
-
         });
     
-
     window.logout = () => {
         signOut(auth).then(() => {
             window.location.href = "login.html";
