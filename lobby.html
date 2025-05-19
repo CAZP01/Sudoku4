@@ -6,25 +6,148 @@
   <title>Matchmaking</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+      background-color: #b0c4de;
+      font-family: sans-serif;
     }
-    #player-list {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      max-width: 400px;
+
+    .lobby-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      background-color: #fff;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cancel-button {
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      color: black;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .cancel-button:hover {
+      background-color: #ffcccc;
+    }
+
+    .players-circle {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
     .player {
-      padding: 5px 0;
+      position: absolute;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .username {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      color: #333;
+    }
+
+    .player img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .player-top {
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .player-left {
+      left: 10%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .player-right {
+      right: 10%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .player-bottom {
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .start-button {
+      position: absolute;
+      padding: 12px 24px;
+      background-color: #c9f2c9;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+      bottom: 50%;
+      transform: translateY(50%);
     }
   </style>
 </head>
 <body>
-  <h1>Lobby Room</h1>
-  <div id="player-list">
-    <h2>Players in Room:</h2>
-    <ul id="players-ul"></ul>
+  <div class="lobby-container">
+    <div class="top-bar">
+      <button class="cancel-button">CANCEL ✕</button>
+    </div>
+    
+    <div class="players-circle">
+      <div class="player player-top">
+        <img src="https://i.imgur.com/xyz1.png" alt="Player 1">
+      </div>
+      <div class="player player-left">
+        <img src="https://i.imgur.com/xyz2.png" alt="Player 2">
+      </div>
+      <div class="player player-right">
+        <img src="https://i.imgur.com/xyz3.png" alt="Player 3">
+      </div>
+      <div class="player player-bottom">
+        <img src="https://i.imgur.com/xyz4.png" alt="Player 4">
+      </div>
+
+      <button id="startButton" class="start-button" style="display:none;">START</button>
+    </div>
   </div>
 
   <script type="module">
@@ -138,20 +261,67 @@
     function listenPlayers(roomId) {
       const playersRef = ref(db, `lobby/${roomId}/players`);
       onValue(playersRef, (snapshot) => {
-        const list = document.getElementById("players-ul");
-        list.innerHTML = "";
+        const playerDivs = [
+          document.querySelector(".player-top"),
+          document.querySelector(".player-left"),
+          document.querySelector(".player-right"),
+          document.querySelector(".player-bottom")
+        ];
+
+        playerDivs.forEach(div => (div.innerHTML = ""));
+        const startButton = document.getElementById("startButton");
 
         if (snapshot.exists()) {
-          const players = snapshot.val();
-          Object.values(players).forEach(player => {
-            const li = document.createElement("li");
-            li.className = "player";
-            li.textContent = player.username;
-            list.appendChild(li);
+          const players = Object.values(snapshot.val());
+
+          players.forEach((player, index) => {
+            if (index < 4) {
+              const username = player.username;
+              const avatarUrl = `https://i.pravatar.cc/80?u=${player.uid}`;
+
+              playerDivs[index].innerHTML = `
+                <div class="avatar">
+                  <img src="${avatarUrl}" alt="${username}" />
+                </div>
+                <div class="username">${username}</div>
+              `;
+            }
           });
+
+          if (players.length >= 2) {
+            startButton.style.display = "block";
+          } else {
+            startButton.style.display = "none";
+          }
         }
       });
     }
+
+    document.querySelector(".cancel-button").addEventListener("click", cancelLobby);
+
+    async function cancelLobby() {
+      const user = auth.currentUser;
+      if (!user || !currentRoomId) return;
+
+      const playerRef = ref(db, `lobby/${currentRoomId}/players/${user.uid}`);
+      await set(playerRef, null);
+
+      const playersRef = ref(db, `lobby/${currentRoomId}/players`);
+      const playersSnap = await get(playersRef);
+
+      if (!playersSnap.exists() || Object.keys(playersSnap.val()).length === 0) {
+        await set(ref(db, `lobby/${currentRoomId}`), null);
+      }
+
+      window.location.href = "dashboard.html";
+    }
+
+    document.getElementById("startButton").addEventListener("click", async () => {
+      const roomRef = ref(db, `lobby/${currentRoomId}`);
+      await update(roomRef, {
+        status: 'full'
+      });
+    });
   </script>
 </body>
 </html>
