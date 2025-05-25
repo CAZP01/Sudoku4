@@ -204,11 +204,12 @@
           });
         }
 
+        localStorage.setItem("currentRoomId", currentRoomId);
         await joinLobby(currentRoomId, uid);
         listenLobbyStatus(currentRoomId);
         listenPlayers(currentRoomId);
       } else {
-        console.log("User belum login.");
+        window.location.href = "login.html";
       }
     });
 
@@ -234,10 +235,17 @@
           const playerRef = ref(db, `lobby/${roomId}/players/${uid}`);
           await set(playerRef, {
             uid,
-            username
+            username,
+            score: 0
           });
 
-          if (playerCount + 1 === room.maxPlayers) {
+          if (playerCount === 0) {
+            // Pemain pertama yang join jadi host
+            await update(ref(db, `lobby/${roomId}/players/${uid}`), {
+              isHost: true
+            });
+          }
+          else if (playerCount + 1 === room.maxPlayers) {
             update(ref(db, `lobby/${roomId}`), {
               status: 'full'
             });
