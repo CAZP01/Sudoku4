@@ -31,6 +31,24 @@
       border-right: 2px solid black;
       border-bottom: 2px solid black;
     }
+    .num-pad {
+            display: flex;
+            flex-wrap: wrap;
+            width: 150px;
+            margin-top: 10px;
+        }
+        .num-pad button {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            margin: 2px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .num-pad button.active {
+            transform: scale(0.9);
+            background-color: lightgray;
+        }
   </style>
 </head>
 <body>
@@ -38,6 +56,8 @@
 <h1>Sudoku with Solver</h1>
 <h2>Skor: <span id="score">0</span></h2>
 <table id="sudoku-board"></table>
+
+<div class="num-pad" id="numPad"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -62,6 +82,7 @@
   let score = 0;
   let solutionBoard = [];
   let confirm = null;
+  let selectedInput = null;
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
@@ -100,6 +121,34 @@
         solutionBoard = room.solution;
       }
     });
+  });
+
+  function makepad() {
+    let pad = document.getElementById("numPad");
+    for (let i = 1; i <= 9; i++) {
+      let tombol = document.createElement("button");
+      tombol.textContent = i;
+      tombol.id = `num-${i}`;
+      tombol.onclick = () => {
+        if (selectedInput) {
+          selectedInput.value = i;
+          checkInput({point: selectedInput});
+        }
+      };
+      pad.appendChild(tombol);
+    }
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (selectedInput && event.key >= 1 && event.key <= 9) {
+      selectedInput.value = event.key;
+      checkInput({ point: selectedInput });
+      let tombol = document.getElementById(`num-${event.key}`);
+      if (tombol) {
+        tombol.classList.add("active");
+        setTimeout(() => tombol.classList.remove("active"), 100);
+      }
+    }
   });
 
   function doplet(p1, p2) {
@@ -147,7 +196,7 @@
     return true;
   }
 
-  function generateFullBoard() {
+  function generateFullBoard(fullBoard) {
     const board = createEmptyBoard();
     fillBoard(board);
     return board;
