@@ -225,7 +225,7 @@
     return count === 1;
   }
 
-  function generatePuzzle() {
+  function generatePuzzle(fullBoard) {
     solutionBoard = fullBoard.map(r => r.slice());
     const puzzle = fullBoard.map(row => row.slice());
 
