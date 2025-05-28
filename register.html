@@ -142,11 +142,6 @@
       <button onclick="register()">REGISTER</button>
     </div>
 
-    <div id="userSection" class="hidden">
-      <p>Selamat datang, <span id="userEmail"></span></p>
-      <button onclick="logout()">Logout</button>
-    </div>
-
     <div id="status"></div>
   </div>
 
@@ -197,20 +192,9 @@
       }
     };
 
-    window.logout = () => {
-      signOut(auth).then(() => {
-        document.getElementById("status").innerText = "Berhasil logout.";
-      });
-    };
-
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        document.getElementById("authSection").classList.add("hidden");
-        document.getElementById("userSection").classList.remove("hidden");
-        document.getElementById("userEmail").innerText = user.email;
-      } else {
-        document.getElementById("authSection").classList.remove("hidden");
-        document.getElementById("userSection").classList.add("hidden");
+        window.location.href = "dashboard.html";
       }
     });
   </script>
