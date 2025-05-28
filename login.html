@@ -153,14 +153,8 @@
           document.getElementById("status").innerText = "Login berhasil!";
         })
         .catch((error) => {
-          document.getElementById("status").innerText = `Gagal login: ${error.message}`;
+          document.getElementById("status").innerText = "Email/Password Invalid";
         });
-    };
-
-    window.logout = () => {
-      signOut(auth).then(() => {
-        document.getElementById("status").innerText = "Berhasil logout.";
-      });
     };
 
     onAuthStateChanged(auth, (user) => {
