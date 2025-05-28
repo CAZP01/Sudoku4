@@ -16,6 +16,7 @@
       font-size: 18px;
       text-align: center;
       border: none;
+      caret-color: transparent;
     }
     input[readonly] {
       background-color: #eee;
@@ -53,7 +54,8 @@
 </head>
 <body>
 
-<h1>Sudoku with Solver</h1>
+<h1>Deathmatch Sudoku</h1>
+<p id="timer">03:00</p>
 <h2>Skor: <span id="score">0</span></h2>
 <table id="sudoku-board"></table>
 
@@ -83,6 +85,8 @@
   let solutionBoard = [];
   let confirm = null;
   let selectedInput = null;
+  let time = 3 * 60;
+  const timer = document.getElementById("timer");
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
@@ -95,8 +99,9 @@
       const roomSnap = await get(ref(db, `lobby/${roomId}`));
       const room = roomSnap.val();
       if (!room.puzzle || !room.solution) {
+        const easy = Math.floor(Math.random() * (45 - 35 + 1)) + 35;
         const fullBoard = generateFullBoard();
-        const puzzle = generatePuzzle(fullBoard);
+        const puzzle = generatePuzzle(fullBoard, easy);
         solutionBoard = fullBoard;
         try{
           await update(ref(db, `lobby/${roomId}`), {
@@ -130,20 +135,21 @@
       tombol.textContent = i;
       tombol.id = `num-${i}`;
       tombol.onclick = () => {
-        if (selectedInput) {
-          selectedInput.value = i;
-          checkInput({point: selectedInput});
-        }
+        if (!selectedInput || selectedInput.readOnly) return;
+        selectedInput.value = i;
+        handleChange(selectedInput);
       };
       pad.appendChild(tombol);
     }
   }
 
   document.addEventListener("keydown", (event) => {
-    if (selectedInput && event.key >= 1 && event.key <= 9) {
-      selectedInput.value = event.key;
-      checkInput({ point: selectedInput });
-      let tombol = document.getElementById(`num-${event.key}`);
+    if (!selectedInput || selectedInput.readOnly) return;
+    const key = parseInt(event.key);
+    if (key >= 1 && key <= 9) {
+      selectedInput.value = key;
+      handleChange(selectedInput);
+      const tombol = document.getElementById(`num-${key}`);
       if (tombol) {
         tombol.classList.add("active");
         setTimeout(() => tombol.classList.remove("active"), 100);
@@ -160,6 +166,22 @@
     }
     return true;
   }
+
+  function countdown() {
+    const menit = Math.floor(time / 60);
+    const detik = time % 60;
+    timer.textContent = `${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+  }
+  const interval = setInterval(() => {
+    if (time <= 0) {
+      clearInterval(interval);
+      timer.textContent = "WAKTU HABIS"; // Bisa diganti aksi lain
+    } else {
+      countdown();
+      time--;
+    }
+  }, 1000);
+  countdown();
 
   function isValid(board, row, col, num) {
     for (let i = 0; i < SIZE; i++) {
@@ -196,7 +218,7 @@
     return true;
   }
 
-  function generateFullBoard(fullBoard) {
+  function generateFullBoard() {
     const board = createEmptyBoard();
     fillBoard(board);
     return board;
@@ -225,7 +247,7 @@
     return count === 1;
   }
 
-  function generatePuzzle(fullBoard) {
+  function generatePuzzle(fullBoard, maxBlanks) {
     solutionBoard = fullBoard.map(r => r.slice());
     const puzzle = fullBoard.map(row => row.slice());
 
@@ -238,11 +260,15 @@
 
     positions.sort(() => Math.random() - 0.5);
 
+    let removed = 0;
     for (const [r, c] of positions) {
       const backup = puzzle[r][c];
       puzzle[r][c] = 0;
       if (!hasUniqueSolution(puzzle)) {
         puzzle[r][c] = backup;
+      } else {
+        removed++;
+        if (removed >= maxBlanks) break;
       }
     }
 
@@ -272,9 +298,18 @@
           input.value = puzzle[row][col];
           input.setAttribute("readonly", "true");
         } else {
+          input.addEventListener("focus", () => {
+            selectedInput = input;
+          });
           input.addEventListener("input", onInputChange);
         }
 
+        input.addEventListener("keydown", (e) => {
+          e.preventDefault();
+        });
+        input.addEventListener("click", () => {
+          selectedInput = input;
+        })
         td.appendChild(input);
         tr.appendChild(td);
       }
@@ -305,8 +340,7 @@
     });
   }
 
-  function onInputChange(e) {
-    const input = e.target;
+  function handleChange(input) {
     const value = parseInt(input.value);
     const row = parseInt(input.dataset.row);
     const col = parseInt(input.dataset.col);
@@ -337,6 +371,10 @@
     }
   }
 
+  function onInputChange(e) {
+    handleChange(e.target);
+  }
+
   function solvedBoard(board) {
     for (let row = 0; row < SIZE; row++) {
       for (let col = 0; col < SIZE; col++) {
@@ -364,6 +402,8 @@
       set(scoreRef, score);
     }
   }
+
+  makepad();
 </script>
 
 </body>
