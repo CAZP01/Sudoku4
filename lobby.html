@@ -12,6 +12,18 @@
       font-family: sans-serif;
     }
 
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; /* ganti dari 'right' */
+      background-color: #ffffff;
+      padding: 0 32px;
+      color: #13293d;
+      width: 100vw;
+      height: 50px; /* tambahkan tinggi jika perlu */
+      box-sizing: border-box; /* jaga padding tidak melebihi 100vw */
+    }
+
     .lobby-container {
       width: 100vw;
       height: 100vh;
@@ -22,11 +34,10 @@
 
     .top-bar {
       display: flex;
-      justify-content: flex-end;
       align-items: center;
-      background-color: #fff;
-      padding: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      justify-content: flex-end;
+      width: 100%;
+      height: 100%;
     }
 
     .cancel-button {
@@ -127,10 +138,12 @@
   </style>
 </head>
 <body>
-  <div class="lobby-container">
+  <header>
     <div class="top-bar">
       <button class="cancel-button">CANCEL ✕</button>
     </div>
+  </header>
+  <div class="lobby-container">
     
     <div class="players-circle">
       <div class="player player-top">
@@ -240,7 +253,6 @@
           });
 
           if (playerCount === 0) {
-            // Pemain pertama yang join jadi host
             await update(ref(db, `lobby/${roomId}/players/${uid}`), {
               isHost: true
             });
