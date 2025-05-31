@@ -165,16 +165,17 @@
       object-fit: cover;
     }
     .player-score {
-      margin-left: 90px;
+      margin-top: 27px;
+      margin-left: 50px;
       font-weight: bold;
-      font-size: 22px;
+      font-size: 27px;
     }
   </style>
 </head>
 <body>
 <header>
   <div class="top-bar">
-    <button class="cancel-button">←-Deathmatch</button>
+    <button class="cancel-button">Deathmatch ✕</button>
   </div>
 </header>
 <div class="main-content">
@@ -226,12 +227,18 @@
   const db = getDatabase(app);
 
   const SIZE = 9;
-  let score = 0;
+  const savedTime = localStorage.getItem("sudokuTime");
+  const savedScore = localStorage.getItem("sudokuScore");
+  let score = savedScore !== null ? parseInt(savedScore, 10) : 0;
   let solutionBoard = [];
   let confirm = null;
   let selectedInput = null;
-  let time = 3 * 60;
+  let time = savedTime !== null ? parseInt(savedTime, 10) : 180;
   const timer = document.getElementById("timer");
+  const saveGameState = () => {
+    localStorage.setItem("sudokuTime", time);
+    localStorage.setItem("sudokuScore", score);
+  };
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
@@ -245,6 +252,8 @@
       const roomSnap = await get(ref(db, `lobby/${roomId}`));
       const room = roomSnap.val();
       if (!room.puzzle || !room.solution) {
+        localStorage.removeItem('sudokuTime');
+        localStorage.removeItem('sudokuScore');
         const easy = Math.floor(Math.random() * (45 - 35 + 1)) + 35;
         const fullBoard = generateFullBoard();
         const puzzle = generatePuzzle(fullBoard, easy);
@@ -318,19 +327,11 @@
     if (time <= 0) {
       clearInterval(interval);
       timer.textContent = "WAKTU HABIS";
-      const perbaruilead = ref(db, `users/${user.uid}/score`);
-      get(perbaruilead).then((snapshot) => {
-        const currentScore = snapshot.val() || 0;
-        const newScore = currentScore + score;
-        return set(perbaruilead, newScore);
-      }).then(() => {
-        alert("GAME OVER");
-      }).catch((error) => {
-        alert("KECURANGAN TERDETEKSI");
-      })
+      gameScore();
     } else {
       countdown();
       time--;
+      saveGameState();
     }
   }, 1000);
 
@@ -587,6 +588,24 @@
           }
         });
       }
+    });
+  }
+
+  function gameScore() {
+    const user = auth.currentUser;
+    const endScore = ref(db, `users/${user.uid}/score`);
+
+    get(endScore)
+    .then((snapshot) => {
+      const leadScore = snapshot.exists() ? snapshot.val() : 0;
+      const totalScore = leadScore + score;
+      return set(endScore, totalScore);
+    })
+    .then(() => {
+      alert("GAME OVER");
+    })
+    .catch((error) => {
+      alert("CHEAT DETECTED");
     });
   }
 
