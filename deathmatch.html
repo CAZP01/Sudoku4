@@ -252,8 +252,6 @@
       const roomSnap = await get(ref(db, `lobby/${roomId}`));
       const room = roomSnap.val();
       if (!room.puzzle || !room.solution) {
-        localStorage.removeItem('sudokuTime');
-        localStorage.removeItem('sudokuScore');
         const easy = Math.floor(Math.random() * (45 - 35 + 1)) + 35;
         const fullBoard = generateFullBoard();
         const puzzle = generatePuzzle(fullBoard, easy);
@@ -328,6 +326,9 @@
       clearInterval(interval);
       timer.textContent = "WAKTU HABIS";
       gameScore();
+      if (localStorage.getItem('sudokuScore') !== null) {
+        localStorage.removeItem('sudokuScore');
+      }
     } else {
       countdown();
       time--;
@@ -336,7 +337,11 @@
   }, 1000);
 
   document.querySelector(".cancel-button").addEventListener("click", function() {
-    window.location.href = "dashboard.html";
+    localStorage.removeItem('sudokuTime');
+    localStorage.removeItem('sudokuScore');
+    setTimeout(() => {
+        window.location.href = "dashboard.html";
+    }, 100);
   });
 
   function isValid(board, row, col, num) {
