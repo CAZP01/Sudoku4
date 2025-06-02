@@ -184,6 +184,7 @@
             });
         }).then(() => {
           document.getElementById("status").innerText = "Akun berhasil dibuat! Silakan login.";
+          window.location.href = "login.html";
         }).catch((error) => {
           document.getElementById("status").innerText = `Gagal daftar: ${error.message}`;
         });
@@ -191,12 +192,6 @@
         document.getElementById("status").innerText = "Password tidak sesuai.";
       }
     };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        location.href = "login.html";
-      }
-    });
   </script>
 </body>
 </html>
